@@ -1,3 +1,1 @@
-This is a full-stack website created with the purpose of providing an environment for those wanting to improve at
-leetcode questions. Through tracking of completed problems, average completion times, and solutions with notes to provide context
-for future problems.
+This website is designed to help individuals improve their skills in solving LeetCode questions. The website tracks completed problems, and average completion times, and provides solutions with notes to help with future problems.
