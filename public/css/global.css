@@ -2,6 +2,8 @@ body {
     background-color: #242424;
     margin: 0;
     font-family: Sanchez, sans-serif;
+    height: 100%;
+    width: 100%;
 }
 
 div{

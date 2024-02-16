@@ -1,9 +1,13 @@
+// Imports
 const express = require("express");
-const app = express();
 const path = require('path');
-const port = 8000;
-
 const mysql = require('mysql')
+const {json} = require("express");
+const ejs = require('ejs');
+
+// Inits
+const app = express();
+const port = 3000;
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -11,7 +15,10 @@ const connection = mysql.createConnection({
     database: 'users'
 });
 
-app.use('/public', express.static( '../frontend/public'));
+app.use(express.static( path.join(__dirname, '../public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'))
+app.use(express.json());
 
 connection.connect(function(err) {
     if (err) throw err
@@ -19,11 +26,32 @@ connection.connect(function(err) {
 });
 
 // sends login page
-app.get('/', function(request, response){
-    response.sendFile((path.join(__dirname, '../frontend/views/index.html')));
+app.get('/', function(req, res){
+    res.sendFile((path.join(__dirname, '../views/mainpage.html')));
 });
 
-app.listen(port, () => console.log(`server running on http://localhost:${port}`));
+let userData = [];
+const pageSize = 2;
+app.get('/:username/page=:val', (req, res) => {
+    const {username, value} = req.params;
+    connection.query(`SELECT * FROM user_problems where username_='${username}'`, (err, result, fields) => {
+        if (err) throw err;
+        const page = parseInt(value) || 1;
+        const startIdx = (page - 1) * pageSize;
+        const endIdx = (startIdx+1) * pageSize;
+        const pageData = result.slice(startIdx, endIdx);
+
+        res.render('mainpage', {data: pageData, currentPage: page, totalPages: Math.ceil(userData.length / pageSize) })
+    })
+});
+
+function getUserProblems(username){
+     connection.query(`SELECT * FROM user_problems where username_='${username}'`, (err, result, fields) => {
+        if (err) throw err;
+        console.log(result)
+        return result
+    })
+}
 
 // function to check if user is in database
 function checkUser(username=null, password=null){
@@ -38,11 +66,4 @@ function checkUser(username=null, password=null){
     })
 }
 
-function validateLeetcodeProfile(username){
-    connection.query(`SELECT * FROM user_info where leetcode_profile=${username}`, (err, result, fields) => {
-
-    })
-}
-
-checkUser('wbpatterson', 'momdad40');
-connection.end();
+app.listen(port, () => console.log(`server running on http://localhost:${port}`));
