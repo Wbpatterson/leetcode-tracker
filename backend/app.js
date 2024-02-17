@@ -15,9 +15,11 @@ const connection = mysql.createConnection({
     database: 'users'
 });
 
-app.use(express.static( path.join(__dirname, '../public')));
+// taskkill /f /im node.exe - kills of node processes
+
+app.use(express.static( path.join(__dirname, '../public'))); // sends static .css & .js files
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'))
+app.set('views', path.join(__dirname, '../views')) // retrieves .ejs files from views folder
 app.use(express.json());
 
 connection.connect(function(err) {
@@ -30,18 +32,18 @@ app.get('/', function(req, res){
     res.sendFile((path.join(__dirname, '../views/mainpage.html')));
 });
 
-let userData = [];
-const pageSize = 2;
-app.get('/:username/page=:val', (req, res) => {
-    const {username, value} = req.params;
+
+app.get('/:username/:page', (req, res) => {
+    const {username, page} = req.params
     connection.query(`SELECT * FROM user_problems where username_='${username}'`, (err, result, fields) => {
         if (err) throw err;
-        const page = parseInt(value) || 1;
-        const startIdx = (page - 1) * pageSize;
+        const pageSize = 5;
+        const pageNumber = parseInt(page) || 1;
+        const startIdx = (pageNumber - 1) * pageSize;
         const endIdx = (startIdx+1) * pageSize;
         const pageData = result.slice(startIdx, endIdx);
-
-        res.render('mainpage', {data: pageData, currentPage: page, totalPages: Math.ceil(userData.length / pageSize) })
+        
+        res.render('mainpage', {data: pageData, currentPage: pageNumber, totalPages: Math.ceil(result.length / pageSize) })
     })
 });
 

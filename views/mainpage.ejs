@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sanchez:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css" type="text/css">
     <link rel="stylesheet" href="/css/mainpage.css" type="text/css">
-    <script src="/public/js/mainpage.js" type="javascript"></script>
+    <script src="/js/mainpage.js"></script>
 </head>
 <body>
 <header>
@@ -20,17 +20,17 @@
 </header>
 <div class="problem-stats">
     <div id="easy">
-        <h2>50</h2>
+        <h2 id="easy-num">0</h2>
         <div class="color-line" style="background-color: #4BF967"></div>
         <h3>Easy</h3>
     </div>
     <div id="medium">
-        <h2>25</h2>
+        <h2 id="medium-num">0</h2>
         <div class="color-line" style="background-color: #F7C647"></div>
         <h3>Medium</h3>
     </div>
     <div id="hard">
-        <h2>2</h2>
+        <h2 id="hard-num">0</h2>
         <div class="color-line" style="background-color: #F63131"></div>
         <h3>Hard</h3>
     </div>
@@ -52,7 +52,7 @@
                 <td><%= row.problem%></td>
                 <td><%= row.difficulty %></td>
                 <td><%= row.topic %></td>
-                <td><%= row.time%></td>
+                <td><%= row.time_%></td>
                 <td><%= row.solution %></td>
             </tr>
         <% }); %>

@@ -1,53 +1,41 @@
 
-const itemPerPage = 20;
-
-// need to send a get request upon opening main page
-// url can be /:username/page=:val
-
-let currPage = 0
-
-if (currPage === 0){
-    console.log(currPage)
-} else {
-    console.log(`currPage is not zero but${currPage}`)
-}
-
-currPage++;
-
 function test(pageIndex){
     const req = new XMLHttpRequest();
     req.open("GET", `/page=${pageIndex}`)
-    console.log(req.response)
+    console.log(req.rsesponse)
     return null
 }
 
-function createProblemTable(pageIndex, username){
-    const req = new XMLHttpRequest();
-    req.open("POST", `/page=${pageIndex}`)
-    req.send(username)
-    req.responseType = 'json';
-    let data = req.response;
-    let table = document.getElementsByClassName("problem-stats")[0];
+function sendHttpRequest(method, url, body=null){
+    let promise = new Promise((resolve, rejest) => {
+        let request = new XMLHttpRequest();
+        request.open(method, url);
+        request.responseType = "json";
 
-    let numPages = data.length / itemPerPage;
-    let startIndex = itemPerPage * pageIndex;
-    let endIndex = itemPerPage * (startIndex + pageIndex)
+        request.onload = () => {
+            resolve(request);
+        }
 
-    while (startIndex < endIndex && startIndex < data.length){
-        let newRow = table.insertRow(1); // always going to insert after main headers
-        newRow.insertCell(0).innerHTML = data.username_;
-        newRow.insertCell(1).innerHTML = data.difficulty;
-        newRow.insertCell(2).innerHTML = data.topic;
-        newRow.insertCell(3).innerHTML = data.time_;
-        newRow.insertCell(4).innerHTML = data.solution;
-        startIndex+=1
-    }
-
-    return null ;
+        if (method === "GET")
+            request.send();
+        else
+            request.send(body);
+    })
+    return promise;
 }
 
-let header = document.getElementsByTagName("h1")[0];
-header.innerHTML = "It works";
+let getCount = (method, url) =>{
+    sendHttpRequest(method, url).then(responseData => {
+      console.log(responseData.response);
+      document.getElementById("easy-num").textContent = responseData.response.easySolved || 0;
+      document.getElementById("medium-num").textContent = responseData.response.mediumSolved || 0;
+      document.getElementById("hard-num").textContent = responseData.response.hardSolved || 0;
+    })
+}
+
+window.onload = () => {
+    getCount("GEt","https://leetcode-stats-api.herokuapp.com/wbpatterson"); 
+}
 
 
 
