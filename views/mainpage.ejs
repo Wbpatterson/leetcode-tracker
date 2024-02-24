@@ -15,25 +15,30 @@
 <header>
     <div>
         <h1>Leetcode Problem Tracker</h1>
-        <h3 style="color:#A9A1A1;">profile goes here</h3>
+        <h3 style="color:#A9A1A1;" id="user"><%= username %></h3>
     </div>
 </header>
 <div class="problem-stats">
     <div id="easy">
-        <h2 id="easy-num">0</h2>
+        <h2 id="easy-num"><%= easyCount %></h2>
         <div class="color-line" style="background-color: #4BF967"></div>
         <h3>Easy</h3>
     </div>
     <div id="medium">
-        <h2 id="medium-num">0</h2>
+        <h2 id="medium-num"><%= mediumCount %></h2>
         <div class="color-line" style="background-color: #F7C647"></div>
         <h3>Medium</h3>
     </div>
     <div id="hard">
-        <h2 id="hard-num">0</h2>
+        <h2 id="hard-num"><%= hardCount %> </h2>
         <div class="color-line" style="background-color: #F63131"></div>
         <h3>Hard</h3>
     </div>
+</div>
+<div class="pop-up">
+    <h2 onclick="closePopUp()"
+    style="color: black"
+    >close</h2>
 </div>
 <div class="problem-list">
     <table class="problem-table">
@@ -50,17 +55,21 @@
         <% data.forEach(row => { %>
             <tr>
                 <td><%= row.problem%></td>
-                <td><%= row.difficulty %></td>
+                <td class="difficulty"><%= row.difficulty %></td>
                 <td><%= row.topic %></td>
                 <td><%= row.time_%></td>
-                <td><%= row.solution %></td>
+                <td onclick="openPopUp()"><%= row.solution %></td>
             </tr>
         <% }); %>
         </tbody>
     </table>
+    <div id="page-div">
+        <input type="hidden" id="totalPages" value="<%= totalPages %>">
+        <input type="hidden" id="currentPage" value="<%= currentPage %>">
+    </div>
 </div><br><br>
 <footer>
     <small>© 2024 Patterson development. All rights reserved.</small>
 </footer>
 </body>
-</html>
+</html>       
