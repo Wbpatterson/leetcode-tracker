@@ -34,13 +34,20 @@ let getCount = (method, url) =>{
 
 function applyColor(obj){
     // make this a switch statment
-    if (obj.textContent === "Easy"){
-        obj.style.color = "#4BF967";
-    } else if (obj.textContent === "Medium"){
-        obj.style.color = "#F7C647";
-    } else if (obj.textContent === "Hard"){
-        obj.style.color = "#F63131";
+    switch(obj.textContent){
+        case "Easy":
+            obj.style.color = "#4BF967";
+            break;
+        
+        case "Medium":
+            obj.style.color = "#F7C647";
+            break;
+        
+        case "Hard":
+            obj.style.color = "#F63131";
+            break;
     }
+   
 }
 
 function createButtons(){
@@ -69,14 +76,13 @@ function closePopUp(){
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // getCount("GEt","https://leetcode-stats-api.herokuapp.com/wbpatterson");
+    // getCount("GEt","https://leetcode-stats-api.herokuapp.com/wbpatterson"); makes request for offical leetcode information
 
     // applies appropriate color to each question based on difficulty
-    let diff = document.getElementsByClassName('difficulty');
-    for (let cell = 0; cell < diff.length; cell++){
-        applyColor(diff[cell]);
-    }
+    let diff = document.getElementsByClassName("difficulty");
+    for (let input of diff) applyColor(input);
 
+    // makes pagination for problem page upon loading
     createButtons();
 });
 
