@@ -47,7 +47,6 @@ function applyColor(obj){
             obj.style.color = "#F63131";
             break;
     }
-   
 }
 
 function createButtons(){
@@ -75,12 +74,15 @@ function closePopUp(){
     popup.style.visibility = "hidden";
 }
 
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // getCount("GEt","https://leetcode-stats-api.herokuapp.com/wbpatterson"); makes request for offical leetcode information
 
     // applies appropriate color to each question based on difficulty
     let diff = document.getElementsByClassName("difficulty");
-    for (let input of diff) applyColor(input);
+    for (let input of diff) 
+        applyColor(input);
 
     // makes pagination for problem page upon loading
     createButtons();

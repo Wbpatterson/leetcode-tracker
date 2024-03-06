@@ -17,10 +17,11 @@ const connection = mysql.createConnection({
 
 // taskkill /f /im node.exe - kills of node processes
 
-app.use(express.static( path.join(__dirname, '../public'))); // sends static .css & .js files
+app.use(express.static( path.join(__dirname, '../public'))); // serves static .css & .js files as if they were in root dir
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views')) // retrieves .ejs files from views folder
 app.use(express.json());
+app.use(express.urlencoded({extended: true}))
 
 connection.connect(function(err) {
     if (err) throw err
@@ -33,9 +34,38 @@ app.get('/', function(req, res){
 });
 
 
+app.post('/:username/:page', async (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    try{
+        await validateUser(username, password);
+    } catch(e){
+        console.log(e);
+        res.render('index',
+            {message: e}
+        )
+        return;
+    }
+    
+    const components = await mainPageComponents(username, 1);
+
+    res.render('mainpage',
+        {
+            data: components.pageData, 
+            currentPage: components.pageNumber, 
+            totalPages: components.totalPages,
+            username: username,
+            easyCount: components.easyCount,
+            mediumCount: components.mediumCount,
+            hardCount: components.hardCount
+        }
+    );
+})
+
+
 app.get('/:username/:page', async (req, res) => {
     const {username, page} = req.params;
-    let components = await mainPageComponents(username, page);
+    const components = await mainPageComponents(username, page);
     res.render('mainpage',
         {
             data: components.pageData, 
@@ -64,7 +94,7 @@ function mainPageComponents(username, page){
             const pageNumber = parseInt(page) || 1;
             const startIdx = (pageNumber - 1) * pageSize;
             const endIdx = (startIdx+1) * pageSize;
-            const pageData = result.slice(startIdx, endIdx); // holds info on each problem in a row
+            const pageData = result.slice(startIdx, endIdx); // holds info for current page problems
 
             resolve(
                 {
@@ -77,6 +107,18 @@ function mainPageComponents(username, page){
                 }
             );
         });
+    });
+}
+
+function validateUser(username, password) {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT * FROM user_info where username_='${username}' and password_='${password}'`,
+        (err, results, fields) => {
+            if (err || results.length == 0)
+                reject(new Error("no user found"))
+
+            resolve("user found")
+        })
     });
 }
 
