@@ -1,7 +1,4 @@
 /*
-    It makes more sense to have problem stats display completed problems on site rather than wasting 
-    resource making request to leetcode for irrelevant information
-
     create a function in app.js call columnCount(table, column, value) where it retrieves
     the count of columns that match the value
 */
@@ -54,13 +51,12 @@ function createButtons(){
         username = document.getElementById("user").textContent,
         pageCount = document.getElementById("totalPages").value;
 
-    console.log(pageCount)
 
-    for (let index = 1;  index <= pageCount; ++index){
-            let button = document.createElement("a");
-            button.href = `http://localhost:3000/${username}/${index}`;
-            button.textContent = index;
-            pages.append(button);
+    for (let index = 1;  index <= pageCount; ++index) {
+        let button = document.createElement("a");
+        button.href = `http://localhost:3000/${username}/${index}`; 
+        button.textContent = index;
+        pages.append(button);
     }
 }
 

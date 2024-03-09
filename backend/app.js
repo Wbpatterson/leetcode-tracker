@@ -33,53 +33,61 @@ app.get('/', function(req, res){
     res.sendFile((path.join(__dirname, '../views/index.html')));
 });
 
+// keps track of signed in users 
+loggedInUsers = new Set();
 
-app.post('/:username/:page', async (req, res) => {
+
+// handles verifying that a user is logged in before request for problem information can be made 
+app.post('/login/:username/1', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-    try{
-        await validateUser(username, password);
-    } catch(e){
-        console.log(e);
-        res.render('index',
-            {message: e}
-        )
-        return;
-    }
-    
-    const components = await mainPageComponents(username, 1);
-
-    res.render('mainpage',
-        {
-            data: components.pageData, 
-            currentPage: components.pageNumber, 
-            totalPages: components.totalPages,
-            username: username,
-            easyCount: components.easyCount,
-            mediumCount: components.mediumCount,
-            hardCount: components.hardCount
-        }
-    );
-})
-
-
-app.get('/:username/:page', async (req, res) => {
-    const {username, page} = req.params;
-    const components = await mainPageComponents(username, page);
-    res.render('mainpage',
-        {
-            data: components.pageData, 
-            currentPage: components.pageNumber, 
-            totalPages: components.totalPages,
-            username: username,
-            easyCount: components.easyCount,
-            mediumCount: components.mediumCount,
-            hardCount: components.hardCount
-        }
-    );
+    // *remember to console.log(req.body) to see what is in this object
+    connection.query(`SELECT * FROM user_info where username_='${username}' and password_='${password}'`,
+    async (err, results, fields) => {
+        if (err || results.length == 0){
+            // if incorrect info is inputed login page is re-rendered with errot alert
+            res.render('index', {message: "Incorrect Username or Password"}); 
+        } else {
+            const components = await mainPageComponents(username, 1);
+            loggedInUsers.add(username);
+            res.render('mainpage',
+            {
+                data: components.pageData, 
+                currentPage: components.pageNumber, 
+                totalPages: components.totalPages,
+                username: username,
+                easyCount: components.easyCount,
+                mediumCount: components.mediumCount,
+                hardCount: components.hardCount
+            });
+        } 
+    })
 });
 
 
+// handles path to users problem page 
+app.get('/:username/:page', async (req, res) => {
+    const {username, page} = req.params;
+    if (!loggedInUsers.has(username)){
+        res.status(404).sendFile((path.join(__dirname, '../views/notfound.html')));
+    } else{
+        const components = await mainPageComponents(username, page);
+        res.render('mainpage',
+            {
+                data: components.pageData, 
+                currentPage: components.pageNumber, 
+                totalPages: components.totalPages,
+                username: username,
+                easyCount: components.easyCount,
+                mediumCount: components.mediumCount,
+                hardCount: components.hardCount
+            }
+        );
+    }
+});
+
+
+// retrieves user problem info and from server 
 function mainPageComponents(username, page){
     return new Promise((resolve, reject) => {
         connection.query(`SELECT * FROM user_problems where username_='${username}'`,
@@ -110,19 +118,6 @@ function mainPageComponents(username, page){
     });
 }
 
-function validateUser(username, password) {
-    return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM user_info where username_='${username}' and password_='${password}'`,
-        (err, results, fields) => {
-            if (err || results.length == 0)
-                reject(new Error("no user found"))
-
-            resolve("user found")
-        })
-    });
-}
-
-
 function columnCount(username, difficulty, table){
     return new Promise((resolve, reject) => {
         connection.query(`SELECT * FROM ${table} where username_='${username}' and difficulty='${difficulty}'`,
@@ -132,7 +127,6 @@ function columnCount(username, difficulty, table){
         });
     });
 }
-
 
 app.on('close', () =>{
     connection.end();
