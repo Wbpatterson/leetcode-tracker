@@ -29,9 +29,27 @@ connection.connect(function(err) {
 });
 
 // sends login page
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
     res.sendFile((path.join(__dirname, '../views/index.html')));
 });
+
+
+app.get('/signup', (req, res) => {
+    res.sendFile((path.join(__dirname, '../views/signup.html')));
+});
+
+app.get('/textbox/:langauge/:problem', (req, res) => {
+    const language = req.params.langauge;
+    let problem = req.params.problem;
+    problem = problem.replaceAll("_", " ");
+    console.log(req.params)
+    let sql = `SELECT * FROM user_problems where problem='${problem}' and solution='${language}'`;
+    connection.query(sql, (err, results, fields) => {
+        if (err) throw err;
+        res.status(200).json(results[0]);
+    });
+});
+
 
 // keps track of signed in users 
 loggedInUsers = new Set();
@@ -42,8 +60,8 @@ app.post('/login/:username/1', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     // *remember to console.log(req.body) to see what is in this object
-    connection.query(`SELECT * FROM user_info where username_='${username}' and password_='${password}'`,
-    async (err, results, fields) => {
+    let sql = `SELECT * FROM user_info where username_='${username}' and password_='${password}'`;
+    connection.query(sql,  async (err, results, fields) => {
         if (err || results.length == 0){
             // if incorrect info is inputed login page is re-rendered with errot alert
             res.render('index', {message: "Incorrect Username or Password"}); 
@@ -90,13 +108,13 @@ app.get('/:username/:page', async (req, res) => {
 // retrieves user problem info and from server 
 function mainPageComponents(username, page){
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM user_problems where username_='${username}'`,
-         async (error, result, fields) => {
+        let sql = `SELECT * FROM user_problems where username_='${username}'`;
+        connection.query(sql, async (error, result, fields) => {
             if (error) reject(error);
 
-            const easyCount = await columnCount(username, 'Easy', 'user_problems');
-            const mediumCount = await columnCount(username, 'Medium', 'user_problems');
-            const hardCount = await columnCount(username, 'Hard', 'user_problems');
+            const easyCount = await problemCount(username, 'Easy', 'user_problems');
+            const mediumCount = await problemCount(username, 'Medium', 'user_problems');
+            const hardCount = await problemCount(username, 'Hard', 'user_problems');
 
             const pageSize = 2;
             const pageNumber = parseInt(page) || 1;
@@ -118,17 +136,18 @@ function mainPageComponents(username, page){
     });
 }
 
-function columnCount(username, difficulty, table){
+// this function was made async so that i could return result.length in connection.query from function
+function problemCount(username, difficulty, table){
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM ${table} where username_='${username}' and difficulty='${difficulty}'`,
-        (error, result, fields) => {
+        let sql = `SELECT * FROM ${table} where username_='${username}' and difficulty='${difficulty}'`;
+        connection.query(sql,  (error, result, fields) => {
             if(error) return reject(error);
             resolve(result.length);
         });
     });
 }
 
-app.on('close', () =>{
+app.on('close', () => {
     connection.end();
 })
 

@@ -41,4 +41,16 @@ input{
     width: 309px;
 }
 
+a{
+    color: white;
+    text-decoration: none; /* Remove underline by default */
+    transition: color 0.3s, background-color 0.3s; /* Smooth transition effect */
+    align-self: center;
+    line-height: 1;
+    padding: 1px;
+    border-radius: 10px;
+}
 
+a:hover{
+    background-color: #A9A1A1;
+}

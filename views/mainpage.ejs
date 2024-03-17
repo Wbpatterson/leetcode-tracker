@@ -37,8 +37,11 @@
 </div>
 <div class="pop-up">
     <h2 onclick="closePopUp()"
-    style="color: black"
+    style="color: rgb(183, 183, 142)"
     >close</h2>
+    <form>
+        <textarea id="coding-box" name="coding-box" spellcheck="false">print("hello world")</textarea>
+    </form>
 </div>
 <div class="problem-list">
     <table class="problem-table">
@@ -58,7 +61,7 @@
                 <td class="difficulty"><%= row.difficulty %></td>
                 <td><%= row.topic %></td>
                 <td><%= row.time_ %></td>
-                <td onclick="openPopUp()"><%= row.solution %></td>
+                <td onclick="openPopUp('<%= row.problem%>', '<%= row.solution%>')"><%= row.solution %></td>
             </tr>
         <% }); %>
         </tbody>

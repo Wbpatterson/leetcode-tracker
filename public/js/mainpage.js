@@ -6,7 +6,7 @@ function sendHttpRequest(method, url, body=null){
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
         request.open(method, url);
-        request.responseType = "json";
+        //request.responseType = "json";
 
         request.onload = () => {
             resolve(request);
@@ -16,16 +16,6 @@ function sendHttpRequest(method, url, body=null){
             request.send();
         else
             request.send(body);
-    })
-}
-
-
-let getCount = (method, url) =>{
-    sendHttpRequest(method, url).then(responseData => {
-      console.log(responseData.response);
-      document.getElementById("easy-num").textContent = responseData.response.easySolved || 0;
-      document.getElementById("medium-num").textContent = responseData.response.mediumSolved || 0;
-      document.getElementById("hard-num").textContent = responseData.response.hardSolved || 0;
     })
 }
 
@@ -46,6 +36,8 @@ function applyColor(obj){
     }
 }
 
+const ViewablePages = 6; // max number of pages to show for a page 
+
 function createButtons(){
     let pages = document.getElementById("page-div"),
         username = document.getElementById("user").textContent,
@@ -60,16 +52,27 @@ function createButtons(){
     }
 }
 
-function openPopUp(){
+function openPopUp(problem, language){
     let popup = document.getElementsByClassName("pop-up")[0];
+    let textbox = document.getElementById("coding-box");
+    problem = problem.replaceAll(" ", "_");
+    //console.log(problem)
+    sendHttpRequest('GET', `http://localhost:3000/textbox/${language}/${problem}`)
+    .then(Data => {
+        let result = JSON.parse(Data.responseText);
+        textbox.value = result.solution;
+        // console.log(result);
+    });
     popup.style.visibility = "visible";
 }
 
 function closePopUp(){
     let popup = document.getElementsByClassName("pop-up")[0];
+    let textobx = document.getElementById("coding-box");
+    // add step to send data to server (post)
+    textobx.value = ""
     popup.style.visibility = "hidden";
 }
-
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -82,5 +85,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // makes pagination for problem page upon loading
     createButtons();
+
+    // adds support for tab in <textarea> 
+    document.getElementById('coding-box').addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+
+            // Set textarea value to: text before caret + tab + text after caret
+            this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+
+            // Put caret at the right position again
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
 });
 
