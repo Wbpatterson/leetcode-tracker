@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sanchez:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css" type="text/css">
     <link rel="stylesheet" href="/css/mainpage.css" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.8/ace.js" integrity="sha512-u8Li+VRzprAsXVzZsUJ/BJm5fk6T4yFNFqh8t2QjiwtRopvsrTPss4rwOxsUMdksqngUgLjN6wrxD4DU9c3l7Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/js/mainpage.js"></script>
 </head>
 <body>
@@ -35,14 +36,34 @@
         <h3>Hard</h3>
     </div>
 </div>
+<!--Pop up coding bar-->
+<style>
+    #editor { 
+        height: 550px;
+        width: 900px;
+    }
+
+    #close{
+        transition: color 0.3s, background-color 0.3s ;
+        margin-left: 85%;
+        cursor: pointer;
+        background-color: #F63131;
+        border: solid 2px black;
+        width:75px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    #close:hover{
+        background-color: #a5a5a3;
+    }
+
+</style>
 <div class="pop-up">
-    <h2 onclick="closePopUp()"
-    style="color: rgb(183, 183, 142)"
-    >close</h2>
-    <form>
-        <textarea id="coding-box" name="coding-box" spellcheck="false">print("hello world")</textarea>
-    </form>
+    <h3 id="close" onclick="closePopUp()">CLOSE</h2>
+    <pre id="editor" style="font-size:16px"></pre>
 </div>
+<!--Problem Listings-->
 <div class="problem-list">
     <table class="problem-table">
         <thead>
@@ -61,7 +82,7 @@
                 <td class="difficulty"><%= row.difficulty %></td>
                 <td><%= row.topic %></td>
                 <td><%= row.time_ %></td>
-                <td onclick="openPopUp('<%= row.problem%>', '<%= row.solution%>')"><%= row.solution %></td>
+                <td id="solution" onclick="openPopUp('<%= row.problem%>', '<%= row.solution%>')"><%= row.solution %></td>
             </tr>
         <% }); %>
         </tbody>

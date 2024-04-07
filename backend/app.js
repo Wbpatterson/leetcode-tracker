@@ -4,6 +4,7 @@ const path = require('path');
 const mysql = require('mysql')
 const {json} = require("express");
 const ejs = require('ejs');
+const { error } = require("console");
 
 // Inits
 const app = express();
@@ -30,19 +31,45 @@ connection.connect(function(err) {
 
 // sends login page
 app.get('/', (req, res) => {
-    res.sendFile((path.join(__dirname, '../views/index.html')));
+    res.sendFile(path.join(__dirname, '../views/index.html'));
 });
 
 
 app.get('/signup', (req, res) => {
-    res.sendFile((path.join(__dirname, '../views/signup.html')));
+    res.sendFile(path.join(__dirname, '../views/signup.html'));
+});
+
+app.post('/signup', async (req, res) => {
+    const body = req.body;
+    const result = await checkUser(body.username, body.password, body.email);
+    
+    if (Object.keys(result).length > 0){
+        let msg = "Already in use!: ";
+        for ([key, val] of Object.entries(result)){
+            msg += key + " ";
+        }
+        res.render('signup', {
+            msg: msg,
+            firstname: body.firstname,
+            lastname: body.lastname,
+            username: body.username,
+            email: body.email
+        });
+
+    } else {
+        let sql = `INSERT INTO user_info VALUES ('${body.username}', '${body.password}', '${body.firstname}', 
+        '${body.lastname}', '${body.email}')`;
+        connection.query(sql, (error, result, fields) => {
+            res.sendFile(path.join(__dirname, '../views/index.html'));
+        });
+    }
 });
 
 app.get('/textbox/:langauge/:problem', (req, res) => {
     const language = req.params.langauge;
     let problem = req.params.problem;
     problem = problem.replaceAll("_", " ");
-    console.log(req.params)
+    
     let sql = `SELECT * FROM user_problems where problem='${problem}' and solution='${language}'`;
     connection.query(sql, (err, results, fields) => {
         if (err) throw err;
@@ -50,10 +77,8 @@ app.get('/textbox/:langauge/:problem', (req, res) => {
     });
 });
 
-
 // keps track of signed in users 
 loggedInUsers = new Set();
-
 
 // handles verifying that a user is logged in before request for problem information can be made 
 app.post('/login/:username/1', async (req, res) => {
@@ -112,9 +137,9 @@ function mainPageComponents(username, page){
         connection.query(sql, async (error, result, fields) => {
             if (error) reject(error);
 
-            const easyCount = await problemCount(username, 'Easy', 'user_problems');
-            const mediumCount = await problemCount(username, 'Medium', 'user_problems');
-            const hardCount = await problemCount(username, 'Hard', 'user_problems');
+            const easyCount = await problemCount(username, 'Easy');
+            const mediumCount = await problemCount(username, 'Medium');
+            const hardCount = await problemCount(username, 'Hard');
 
             const pageSize = 2;
             const pageNumber = parseInt(page) || 1;
@@ -130,21 +155,42 @@ function mainPageComponents(username, page){
                     easyCount: easyCount,
                     mediumCount: mediumCount,
                     hardCount: hardCount
-                }
-            );
+                });
         });
     });
 }
 
 // this function was made async so that i could return result.length in connection.query from function
-function problemCount(username, difficulty, table){
+function problemCount(username, difficulty){
     return new Promise((resolve, reject) => {
-        let sql = `SELECT * FROM ${table} where username_='${username}' and difficulty='${difficulty}'`;
+        let sql = `SELECT * FROM user_problems where username_='${username}' and difficulty='${difficulty}'`;
         connection.query(sql,  (error, result, fields) => {
-            if(error) return reject(error);
+            if(error) reject(error);
             resolve(result.length);
         });
     });
+}
+
+function checkUser(username, password, email){
+    return new Promise((resolve, reject) => {
+        let sql = `SELECT * FROM user_info where username_='${username}' or password_='${password}' or email='${email}'`;
+        connection.query(sql, (error, results, fields) =>{
+            if (error) reject(error);
+            res = {};
+            for (user of results){
+                if (user.username_ == username)
+                    res.username = username;
+
+                if (user.password_ == password)
+                    res.password = password;
+                
+                if (user.email == email)
+                    res.email = email;
+            }
+            
+            resolve(res);
+        }
+    )});
 }
 
 app.on('close', () => {
